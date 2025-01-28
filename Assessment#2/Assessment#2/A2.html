@@ -10,12 +10,16 @@
         <script src="assessment2hurricaneAna.js" ></script>
 
     </head>
+    <style>
+        p {font-size: 24px;}
+    </style>
+      <p>Tropical Storm Ana</p>
     <body>
-    Tropical Storm Ana 
     <div id="mapid"></div>
     
     <style>
         #mapid{ width: 1000px; height: 700px; }
+        body {background-color: rgb(19, 69, 208);}
     </style>
     <script>  
     
@@ -32,7 +36,7 @@
         popupAnchor: [0,0]
     });
 
-    var customPopup = "Hurricane Ana <br/><img src='ana.jpg'width=100px'/>";
+    var customPopup = "Tropical Storm Ana <br/><img src='ana.jpg'width=100px'/>";
 
     L.geoJSON(hurricaneAna, {   // a
     pointToLayer: function (feature, latlng) { // b
