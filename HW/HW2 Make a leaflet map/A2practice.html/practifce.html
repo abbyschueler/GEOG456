@@ -1,0 +1,68 @@
+<html>
+    <head>
+        <title>My First Leaflet Map</title>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin=""/>
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""></script>
+        <script src="/Users/abbyschueler/Desktop/GEOG456/HW/HW2 Make a leaflet map/old_well_4326.js" ></script>
+    </head>
+        <style>
+            p {font-size: 24px;}
+        </style>
+          <p>My dads house in Hickory, NC!</p>
+    <body>
+    <div id="mapid"></div>
+    
+    <style>
+        #mapid{ width: 900px; height: 500px; }
+        body {background-color:rgb(215, 147, 190)}
+    </style>
+    <script>  
+   
+
+
+    var map = L.map('mapid').setView([35.79855, -81.32824], 14); // YOU CAN CHANGE THE ZOOM
+
+    // this line is creating the variable map by  initializing the L.map class (a Leaflet class) with the mapid element that we created before. setView is a method that can be applied to the class L.map : you can give it a latitude, longitude and a zoom.  The higher the value of the zoom, the finer the initial scale of the map. 
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+    // L.tileLayer can display a tile layer. You can check out other tile layer examples at https://leaflet-extras.github.io/leaflet-providers/preview/. The location of the tile layer needs to be in single quotes. You can also indicate the attribution for that layer. In this example we used the Open StreetMap attribution. The '&copy; <a> and the other information you see here is HTML code adding a copyright sign, and making a hyperlink to OpenStreetMap. 
+    // At the end we include .addTo(map), which is indicating to add the tile layer to the variable map. 
+
+    L.marker([35.79855, -81.32824],).addTo(map)
+        .bindPopup('Dads House') // YOU CAN CHANGE THE MESSAGE
+        .openPopup();
+    
+    // create custom icon variable
+    var houseIcon = L.icon({    // notice the L.icon which is a Leaflet object with properties
+        iconUrl: 'https://usm-feed-nc-canopymls.s3.amazonaws.com/b454d131af40bb06fe74f3c0eeb865b5-1-.jpghttps://usm-feed-nc-canopymls.s3.amazonaws.com/b454d131af40bb06fe74f3c0eeb865b5-1-.jpg?1642431258?1642431258',
+          // this points to a jpg image obtained from the internet
+        iconSize: [75,40], // size of the icon
+        popupAnchor: [0,0] // where the icon is located relative to the lat lon of the point. 
+        });
+    //YOU COULD CHANGE the iconURL, iconSize and popupAnchor to see how the map changes
+
+
+    // create an HTML variable that will pop up with a UNC Well photo
+        var customPopup = "My dads house! <br/><img src='https://media.licdn.com/dms/image/v2/D4E35AQEHMWN_Jy7yxQ/profile-framedphoto-shrink_800_800/profile-framedphoto-shrink_800_800/0/1701311282979?e=1738630800&v=beta&t=k8Bh3TSsgSZ5cmP5LeGcORM98Xia8Hpb7lxzL7Hx-ng 'width='100px'/>";
+    // YOU COULD CHANGE the https link to another picture. 
+    // YOU COULD CHANGE the 100px to other values like 50px or 400px to see what happens
+
+    // the following line should go at the end, before script closing tag 
+
+    L.geoJSON(uncwell, {   // a
+    pointToLayer: function (feature, latlng) { // b
+    return L.marker(latlng, {icon: houseIcon});}}) // c
+    .bindPopup(customPopup) // d
+    .addTo(map); // 
+    
+    // end of script
+    </script>
+    </body>
+</html>
