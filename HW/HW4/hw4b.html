@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+
+    /* style and html from https://www.w3schools.com/html/tryit.asp?filename=tryhtml_table_intro */
+table {
+  font-family: Tahoma, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+  border-radius: 8px; 
+  overflow: hidden; 
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.51);
+}
+
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 10px;
+}
+
+tr:nth-child(even) {
+  background-color: #dddddd;
+}
+
+</style>
+</head>
+<script src="data.js"></script>
+<body>
+
+<h2 style="font-family: 'Verdana', sans-serif; color: #004c3a;" >Rhesus Monkey Spottings in the United States.</h2>
+<h4 style="font-family: 'Verdana', sans-serif; color: #027258;">Over 250 non-native and invasive Rhesus Monkeys have been spotted in Florida since 2015. Monkeys identified within the last 5 years are highlighted by the darker green boxes.</h4>
+
+<table id="mytable">
+  <tr>
+    <th>Monkey ID</th>
+    <th>Location</th>
+    <th>Date Observed</th>
+  </tr>
+  
+</table>
+</script>
+
+<script>
+  var x = document.getElementById('mytable')
+  
+  for (var i =0; i <data.features.length; i++){
+    var properties = data.features[i].properties;
+    var myNewRow = document.createElement('tr');
+    var myNewCell1 = document.createElement('td');
+    var myNewCell2 = document.createElement('td');
+    var myNewCell3 = document.createElement('td');
+    myNewCell1.innerHTML = properties.objectid;
+    myNewCell2.innerHTML = properties.Location;
+    myNewCell3.innerHTML = properties.ObsDate
+
+    var obsDate = Date.parse(properties.ObsDate);
+    var cutoffDate = Date.parse("1/1/2020");
+    myNewCell3.style.backgroundColor = obsDate >= cutoffDate ? "DarkSeaGreen" : "#dfecdf";
+
+    myNewRow.append(myNewCell1);
+    myNewRow.append(myNewCell2);
+    myNewRow.append(myNewCell3);
+    x.append(myNewRow);
+
+  } 
+
+
+</script>
+
+
+</body>
+</html>
