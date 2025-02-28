@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HW5</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script> 
+    <script src="data.js"></script> <!-- Ensure data.js exists and contains valid GeoJSON -->
+    <style>
+        body { background-color: rgb(179, 213, 238); }
+        #mapid { width: 1000px; height: 700px; }
+        .info {
+            padding: 8px;
+            background: white;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Ivasive Rhesus Monkeys are Taking over Florida!</h1>
+    <h3>Use the slider to see them takeover throughout the years</h3>
+    <h3 id="daYear">Date</h3>
+    <input id="dateSlider" type="range" name="Date" min="1" max="253" value="1" oninput="moveSlider(this.value)">
+    <div id="mapid"></div>
+
+    <script>
+        var map = L.map('mapid').setView([27.9944024, -81.7602544], 7); 
+    
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
+
+        var greenIcon = new L.Icon({
+            iconUrl: 'rhesusmonkey.png',  
+            iconSize: [40, 40]
+        });
+
+        function updateMap(sliderValue) {
+            map.eachLayer(function(layer) {
+                if (layer instanceof L.Marker) {
+                    map.removeLayer(layer);
+                }
+            });
+
+            var geojson = L.geoJson({
+                type: "FeatureCollection",
+                features: data.features.slice(0, sliderValue)
+            }, {
+                pointToLayer: function(feature, latlng) {
+                    var marker = L.marker(latlng, { icon: greenIcon });
+                    marker.bindPopup("Date: " + feature.properties.ObsDate + ": " + feature.properties.Location);
+                    return marker;
+                }
+            }).addTo(map);
+
+            var output = document.getElementById("daYear");
+            output.innerHTML = "Date: " + data.features[sliderValue - 1].properties.ObsDate;
+        }
+
+        window.onload = function() {
+            var initialSliderValue = 1;
+            updateMap(initialSliderValue);
+        };
+
+        function moveSlider(sliderValue) {
+            updateMap(sliderValue);
+        }
+    </script>
+</body>
+</html>

@@ -10,6 +10,11 @@
     crossorigin=""></script> 
     <script src="data.js" ></script>
 </head>
+<style></style>
+</style>
+  <h1>Ivasive Rhesus Monkeys are Taking over Flordia!</h1>
+  <h3>Use the slider to see them takeover throughout the years</h3>
+<body>
 <style>
     #mapid { width: 1000px; height: 700px; }
     body { background-color: rgb(199, 211, 241); }
@@ -22,7 +27,7 @@
 </style>
 <body>
     <h3 id ="daYear">Date</h3>
-    <input id="dateSlider" type = "range" name = "Date" min = "0" max = "251" oninput="moveSlider(this.value)">
+    <input id="dateSlider" type = "range" name = "Date" min = "0" max = "253" oninput="moveSlider(this.value)">
     <div id="mapid"></div>
 
     <script>
@@ -38,36 +43,36 @@
             iconSize: [40, 40]
         });
 
-        data.features.sort(function(a, b) {
-            var dateA = new Date(a.properties.ObsDate); 
-            var dateB = new Date(b.properties.ObsDate); 
-            return dateA - dateB;
-        });
-
         var geojson = L.geoJson(data, {
             pointToLayer: function(feature, latlng) {
-        var marker = L.marker(latlng, { icon: greenIcon });
-            marker.bindPopup("Date " + feature.properties.ObsDate + ": " + feature.properties.Location);
+            var marker = L.marker(latlng, { icon: greenIcon });
+            marker.bindPopup("Date: " + feature.properties.ObsDate + ": " + feature.properties.Location);
                 return marker; 
             }
         }).addTo(map);
 
-        function moveSlider(value) { 
-            map.removeLayer(geojson);
-            document.getElementById('daYear').innerHTML = 'Date ' + data.features[value].properties.ObsDate;
-            geojson = L.geoJson(data.features[value],{
-                pointToLayer: function(feature,latlng){
-                    return L.marker(latlng,{icon: greenIcon})
+
+        var slider = document.getElementById("dateSlider");
+        var output = document.getElementById("daYear");
+
+    slider.oninput = function() { 
+        output.innerHTML = "Date: " + data.features[(this.value-1)].properties.ObsDate; 
+        map.removeLayer(geojson);
+       
+        geojson = L.geoJson({
+                type: "FeatureCollection",
+                features: data.features.slice(0, this.value) 
+            }, {
+                pointToLayer: function(feature, latlng) {
+                    return L.marker(latlng, { icon: greenIcon });
                 }
-            })
-            map.addLayer(geojson); 
-    
-        }
-        moveSlider(0);
-        window.onload = function () {
-        document.getElementById('dateSlider').value = 0;
+            }).addTo(map);  
         };
 
+        window.onload = function() {
+            slider.value = 1;
+            output.innerHTML = "Date: " + data.features[0].properties.ObsDate; 
+        };  
 
     </script>
 </body>
