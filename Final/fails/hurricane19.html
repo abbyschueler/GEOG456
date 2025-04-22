@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Hurricane Slider Animation</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+  <script src="berylpts.js"></script> <!-- one storm for now -->
+  <style>
+    body, html { margin: 0; padding: 0; height: 100%; }
+    #map { position: absolute; top: 0; bottom: 50px; width: 100%; }
+    #slider-container {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      padding: 10px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+<div id="map"></div>
+<div id="slider-container">
+  <input id="slider" type="range" min="0" max="0" step="1" value="0" />
+</div>
+
+<script>
+  mapboxgl.accessToken = 'pk.eyJ1IjoiYWJieXNjaHVlbGVyIiwiYSI6ImNtM21mdml5djExN3Myam9maDd2YWkza2wifQ.yXzmVhjA9wFE71ocWWuQ-g';
+
+  const map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/light-v11',
+    center: [-80, 30],
+    zoom: 4,
+    pitch: 45
+  });
+
+  let usStatesData = null;
+  const storm = berylpts;
+  let activePointIndex = -1;
+
+  // Fetch and add the states
+  fetch('usstates.geojson')
+    .then(res => res.json())
+    .then(data => {
+      usStatesData = data;
+
+      map.on('load', () => {
+        map.addSource('states', {
+          type: 'geojson',
+          data: usStatesData
+        });
+
+        map.addLayer({
+          id: 'state-extrusions',
+          type: 'fill-extrusion',
+          source: 'states',
+          paint: {
+            'fill-extrusion-color': [
+              'interpolate', ['linear'], ['get', 'costs'],
+              0, '#cccccc',
+              10000000, '#ffcc99',
+              500000000, '#ff9966',
+              1000000000, '#ff6600',
+              20000000000, '#cc3300'
+            ],
+            'fill-extrusion-height': ['*', ['get', 'costs'], 0.0001],
+            'fill-extrusion-base': 0,
+            'fill-extrusion-opacity': 0.85
+          }
+        });
+
+        // Storm point source and layer
+        map.addSource('current-point', {
+          type: 'geojson',
+          data: {
+            type: 'FeatureCollection',
+            features: []
+          }
+        });
+
+        map.addLayer({
+          id: 'storm-point',
+          type: 'circle',
+          source: 'current-point',
+          paint: {
+            'circle-radius': 6,
+            'circle-color': '#0000ff'
+          }
+        });
+
+        setupSlider();
+      });
+    });
+
+  function setupSlider() {
+    const slider = document.getElementById('slider');
+    slider.max = storm.features.length - 1;
+
+    slider.addEventListener('input', () => {
+      const index = parseInt(slider.value);
+      if (index === activePointIndex) return;
+      activePointIndex = index;
+
+      const feature = storm.features[index];
+      updateStormPoint(feature);
+      checkStateIntersection(feature);
+    });
+  }
+
+  function updateStormPoint(feature) {
+    const pointGeoJSON = {
+      type: 'FeatureCollection',
+      features: [feature]
+    };
+    map.getSource('current-point').setData(pointGeoJSON);
+  }
+
+  function checkStateIntersection(feature) {
+    const point = turf.point(feature.geometry.coordinates);
+    let updated = false;
+
+    usStatesData.features.forEach(state => {
+      if (turf.booleanPointInPolygon(point, state)) {
+        const oldCost = state.properties.costs || 0;
+        if (oldCost === 0) {
+          state.properties.costs = 1000000000;
+          updated = true;
+          console.log('Storm passed over:', state.properties.NAME);
+        }
+      }
+    });
+
+    if (updated) {
+      map.getSource('states').setData(usStatesData);
+    }
+  }
+</script>
+</body>
+</html>

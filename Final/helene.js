@@ -1,0 +1,37 @@
+var helene =
+{
+"type": "FeatureCollection",
+"name": "helene",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "STORMNAME": "HELENE", "DTG": 2024092312, "LAT": 17.0, "LON": -82.0, "field_5": "null", "field_6": null }, "geometry": { "type": "Point", "coordinates": [ -82.0, 17.0 ] } },
+{ "type": "Feature", "properties": { "STORMNAME": "HELENE", "DTG": 2024092318, "LAT": 18.0, "LON": -82.0, "field_5": "null", "field_6": null }, "geometry": { "type": "Point", "coordinates": [ -82.0, 18.0 ] } },
+{ "type": "Feature", "properties": { "STORMNAME": "HELENE", "DTG": 2024092400, "LAT": 18.0, "LON": -82.0, "field_5": "null", "field_6": null }, "geometry": { "type": "Point", "coordinates": [ -82.0, 18.0 ] } },
+{ "type": "Feature", "properties": { "STORMNAME": "HELENE", "DTG": 2024092406, "LAT": 19.0, "LON": -83.0, "field_5": "null", "field_6": null }, "geometry": { "type": "Point", "coordinates": [ -83.0, 19.0 ] } },
+{ "type": "Feature", "properties": { "STORMNAME": "HELENE", "DTG": 2024092412, "LAT": 19.0, "LON": -84.0, "field_5": "null", "field_6": null }, "geometry": { "type": "Point", "coordinates": [ -84.0, 19.0 ] } },
+{ "type": "Feature", "properties": { "STORMNAME": "HELENE", "DTG": 2024092418, "LAT": 19.0, "LON": -85.0, "field_5": "null", "field_6": null }, "geometry": { "type": "Point", "coordinates": [ -85.0, 19.0 ] } },
+{ "type": "Feature", "properties": { "STORMNAME": "HELENE", "DTG": 2024092500, "LAT": 20.0, "LON": -85.0, "field_5": "null", "field_6": null }, "geometry": { "type": "Point", "coordinates": [ -85.0, 20.0 ] } },
+{ "type": "Feature", "properties": { "STORMNAME": "HELENE", "DTG": 2024092506, "LAT": 20.0, "LON": -86.0, "field_5": "null", "field_6": null }, "geometry": { "type": "Point", "coordinates": [ -86.0, 20.0 ] } },
+{ "type": "Feature", "properties": { "STORMNAME": "HELENE", "DTG": 2024092512, "LAT": 21.0, "LON": -86.0, "field_5": "null", "field_6": null }, "geometry": { "type": "Point", "coordinates": [ -86.0, 21.0 ] } },
+{ "type": "Feature", "properties": { "STORMNAME": "HELENE", "DTG": 2024092518, "LAT": 22.0, "LON": -86.0, "field_5": "null", "field_6": null }, "geometry": { "type": "Point", "coordinates": [ -86.0, 22.0 ] } },
+{ "type": "Feature", "properties": { "STORMNAME": "HELENE", "DTG": 2024092600, "LAT": 23.0, "LON": -87.0, "field_5": "null", "field_6": null }, "geometry": { "type": "Point", "coordinates": [ -87.0, 23.0 ] } },
+{ "type": "Feature", "properties": { "STORMNAME": "HELENE", "DTG": 2024092606, "LAT": 24.0, "LON": -86.0, "field_5": "null", "field_6": null }, "geometry": { "type": "Point", "coordinates": [ -86.0, 24.0 ] } },
+{ "type": "Feature", "properties": { "STORMNAME": "HELENE", "DTG": 2024092612, "LAT": 25.0, "LON": -86.0, "field_5": "null", "field_6": null }, "geometry": { "type": "Point", "coordinates": [ -86.0, 25.0 ] } },
+{ "type": "Feature", "properties": { "STORMNAME": "HELENE", "DTG": 2024092618, "LAT": 27.0, "LON": -85.0, "field_5": "null", "field_6": null }, "geometry": { "type": "Point", "coordinates": [ -85.0, 27.0 ] } },
+{ "type": "Feature", "properties": { "STORMNAME": "HELENE", "DTG": 2024092700, "LAT": 29.0, "LON": -84.0, "field_5": "null", "field_6": null }, "geometry": { "type": "Point", "coordinates": [ -84.0, 29.0 ] } },
+{ "type": "Feature", "properties": { "STORMNAME": "HELENE", "DTG": 2024092704, "LAT": 30.3, "LON": -83.63, "field_5": "Florida", "field_6": null }, "geometry": { "type": "Point", "coordinates": [ -83.63, 30.3 ] } },
+{ "type": "Feature", "properties": { "STORMNAME": "HELENE", "DTG": 2024092706, "LAT": 31.0, "LON": -83.0, "field_5": "Georgia", "field_6": null }, "geometry": { "type": "Point", "coordinates": [ -83.0, 31.0 ] } },
+{ "type": "Feature", "properties": { "STORMNAME": "HELENE", "DTG": 2024092706, "LAT": 31.45537, "LON": -85.389, "field_5": "Alabama", "field_6": null }, "geometry": { "type": "Point", "coordinates": [ -85.389, 31.45537 ] } },
+{ "type": "Feature", "properties": { "STORMNAME": "HELENE", "DTG": 2024092709, "LAT": 33.0, "LON": -83.0, "field_5": "Georgia", "field_6": null }, "geometry": { "type": "Point", "coordinates": [ -83.0, 33.0 ] } },
+{ "type": "Feature", "properties": { "STORMNAME": "HELENE", "DTG": 2024092712, "LAT": 34.73, "LON": -82.69, "field_5": "South Carolina", "field_6": null }, "geometry": { "type": "Point", "coordinates": [ -82.69, 34.73 ] } },
+{ "type": "Feature", "properties": { "STORMNAME": "HELENE", "DTG": 2024092712, "LAT": 35.88, "LON": -82.15, "field_5": "North Carolina ", "field_6": null }, "geometry": { "type": "Point", "coordinates": [ -82.15, 35.88 ] } },
+{ "type": "Feature", "properties": { "STORMNAME": "HELENE", "DTG": 2024092712, "LAT": 36.38, "LON": -82.45, "field_5": "Tennessee", "field_6": null }, "geometry": { "type": "Point", "coordinates": [ -82.45, 36.38 ] } },
+{ "type": "Feature", "properties": { "STORMNAME": "HELENE", "DTG": 2024092712, "LAT": 37.07, "LON": -81.65, "field_5": "Virginia", "field_6": null }, "geometry": { "type": "Point", "coordinates": [ -81.65, 37.07 ] } },
+{ "type": "Feature", "properties": { "STORMNAME": "HELENE", "DTG": 2024092712, "LAT": 37.59, "LON": -82.3, "field_5": "Kentucky", "field_6": null }, "geometry": { "type": "Point", "coordinates": [ -82.3, 37.59 ] } },
+{ "type": "Feature", "properties": { "STORMNAME": "HELENE", "DTG": 2024092712, "LAT": 38.7, "LON": -82.24, "field_5": "West Virginia", "field_6": null }, "geometry": { "type": "Point", "coordinates": [ -82.24, 38.7 ] } },
+{ "type": "Feature", "properties": { "STORMNAME": "HELENE", "DTG": 2024092712, "LAT": 39.05, "LON": -83.14, "field_5": "Ohio", "field_6": null }, "geometry": { "type": "Point", "coordinates": [ -83.14, 39.05 ] } },
+{ "type": "Feature", "properties": { "STORMNAME": "HELENE", "DTG": 2024092712, "LAT": 38.6, "LON": -85.9, "field_5": "Indiana", "field_6": null }, "geometry": { "type": "Point", "coordinates": [ -85.9, 38.6 ] } },
+{ "type": "Feature", "properties": { "STORMNAME": "HELENE", "DTG": 2024092713, "LAT": 35.33, "LON": -83.0, "field_5": "Kentucky", "field_6": null }, "geometry": { "type": "Point", "coordinates": [ -83.0, 35.33 ] } },
+{ "type": "Feature", "properties": { "STORMNAME": "HELENE", "DTG": 2024092818, "LAT": 37.0, "LON": -87.0, "field_5": "Kentucky", "field_6": null }, "geometry": { "type": "Point", "coordinates": [ -87.0, 37.0 ] } }
+]
+}

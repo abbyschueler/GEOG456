@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Hurricane Cost Animation</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+  <script src="https://unpkg.com/deck.gl@8.9.23/dist.min.js"></script>
+  <script src="berylpts.js"></script>
+  <script src="debbypts.js"></script>
+  <script src="helenepts.js"></script>
+  <script src="miltonpts.js"></script>
+  <script src="francinepts.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+
+  <style>
+    body, html { margin: 0; padding: 0; height: 100%; }
+    #map { position: absolute; width: 100%; height: 100%; }
+  </style>
+</head>
+<body>
+<div id="map"></div>
+<input id="time-slider" type="range" min="0" max="100" value="0" step="1" style="position:absolute; top:10px; left:10px; z-index:999; width:300px;">
+
+<script>
+  mapboxgl.accessToken = 'pk.eyJ1IjoiYWJieXNjaHVlbGVyIiwiYSI6ImNtM21mdml5djExN3Myam9maDd2YWkza2wifQ.yXzmVhjA9wFE71ocWWuQ-g';
+
+  const map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/light-v11',
+    center: [-95, 37],
+    zoom: 3,
+    pitch: 45,
+    bearing: 0
+  });
+
+  map.on('load', () => {
+    map.addSource('states', {
+      type: 'geojson',
+      data: 'us_states.geojson'
+    });
+
+    map.addLayer({
+      id: 'state-extrusions',
+      type: 'fill-extrusion',
+      source: 'states',
+      paint: {
+        'fill-extrusion-color': [
+          'interpolate',
+  ['linear'],
+  ['get', 'costs'],
+  0, '#cccccc',
+  10000000, '#ffcc99',
+  500000000, '#ff9966',
+  1000000000, '#ff6600',
+  20000000000, '#cc3300' ],
+        'fill-extrusion-height': ['*', ['get', 'costs'], 0.00001],
+        'fill-extrusion-base': 0,
+        'fill-extrusion-opacity': 0.85
+      }
+    });
+
+
+
+
+
+    // hurricane points
+    const hurricanes = [miltonpts, berylpts, debbypts, helenepts, francinepts];
+
+    hurricanes.forEach((storm, i) => {
+      map.addSource(`storm${i}`, {
+        type: 'geojson',
+        data: storm
+      });
+
+      map.addLayer({
+        id: `storm${i}-points`,
+        type: 'circle',
+        source: `storm${i}`,
+        paint: {
+          'circle-radius': 4,
+          'circle-color': '#0000ff'
+        }
+      });
+    });
+  });
+
+
+  map.on('load', () => {
+  // your addSource / addLayer code here
+
+  const storm = miltonpts;
+  const slider = document.getElementById('time-slider');
+
+  // Set slider range to storm point count
+  slider.max = storm.features.length - 1;
+
+  slider.addEventListener('input', () => {
+    const index = parseInt(slider.value);
+    const point = storm.features[index];
+
+    if (point && point.geometry) {
+      const coord = point.geometry.coordinates;
+      showPointAsCircle(coord);
+      raiseStateIfOverlapping(coord);
+    }
+  });
+
+  function showPointAsCircle(coord) {
+    // Optionally: flash current point on map
+    map.getSource('current-point') ?
+      map.getSource('current-point').setData({
+        type: 'FeatureCollection',
+        features: [{ type: 'Feature', geometry: { type: 'Point', coordinates: coord } }]
+      }) :
+      map.addSource('current-point', {
+        type: 'geojson',
+        data: {
+          type: 'FeatureCollection',
+          features: [{ type: 'Feature', geometry: { type: 'Point', coordinates: coord } }]
+        }
+      });
+
+    if (!map.getLayer('current-point')) {
+      map.addLayer({
+        id: 'current-point',
+        type: 'circle',
+        source: 'current-point',
+        paint: {
+          'circle-radius': 6,
+          'circle-color': '#ff0000'
+        }
+      });
+    }
+  }
+
+  function raiseStateIfOverlapping(coord) {
+    const statesSource = map.getSource('states');
+    const stateGeoJSON = statesSource._data;
+
+    const point = turf.point(coord);
+
+    stateGeoJSON.features.forEach(feature => {
+      if (turf.booleanPointInPolygon(point, feature)) {
+        // Raise the state by increasing cost
+        feature.properties.costs = Math.min((feature.properties.costs || 0) + 1, 20);
+      }
+    });
+
+    statesSource.setData(stateGeoJSON);
+  }
+});
+
+</script>
+</body>
+</html>

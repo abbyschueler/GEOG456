@@ -1,0 +1,206 @@
+<html>
+<head>
+    <title>Billion Dollar Hurricanes 2024 Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""></script> 
+    <script src="berylpoints.js"></script>
+    <script src="debbypoints.js"></script>
+    <script src="francinepoints.js"></script>
+    <script src="helenepoints.js"></script>
+    <script src="miltonpoints.js"></script>
+</head>
+<style>
+    p { font-size: 24px; }
+</style>
+<body style="background-color: rgb(208, 210, 218);">
+    <p>Billion Dollar Hurricanes in 2024</p>
+    <div id="mapid"></div>
+
+    <style>
+        #mapid { width: 1000px; height: 700px; }
+    </style>
+    
+    <div style="margin-bottom: 20px;">
+        <label>Global Time: 
+          <input type="range" id="globalSlider" min="2024010100" max="2024123123" value="2024010100" step="100">
+          <span id="globalTimeLabel">January 1</span>
+          <button id="playPauseBtn">Play</button>
+        </label>
+      </div>
+      
+      <div>
+        <label>Beryl: <input type="range" id="berylSlider" step="100"></label>
+        <label>Debby: <input type="range" id="debbySlider" step="100"></label>
+        <label>Francine: <input type="range" id="francineSlider" step="100"></label>
+        <label>Helene: <input type="range" id="heleneSlider" step="100"></label>
+        <label>Milton: <input type="range" id="miltonSlider" step="100"></label>
+      </div>
+
+    <script>  
+  var map = L.map('mapid').setView([30, -80], 5); 
+
+    var Thunderforest_TransportDark = L.tileLayer('https://{s}.tile.thunderforest.com/transport-dark/{z}/{x}/{y}{r}.png?apikey=d2e832b11a074eeabe8a409089d1d9d6', {
+    attribution: '&copy; <a href="http://www.thunderforest.com/">Thunderforest</a>, &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: 22
+    });
+    Thunderforest_TransportDark.addTo(map);
+
+
+        var hurricaneIcon = L.icon({
+            iconUrl: 'hurricaneicon.png',
+            iconSize: [65, 40],
+            popupAnchor: [0, 0]
+        });
+
+        function getCustomPopup(hurricaneName) {
+            return hurricaneName;
+        }
+
+
+    // sliders 
+let layers = {
+    beryl: null,
+    debby: null,
+    francine: null,
+    helene: null,
+    milton: null
+};
+
+// Track data
+const storms = {
+    beryl: berylpts,
+    debby: debbypts,
+    francine: francinepts,
+    helene: helenepts,
+    milton: miltonpts
+};
+
+// Helper to draw storm up to a DTG
+function renderStorm(stormName, globalDTG) {
+    const layerKey = stormName.toLowerCase();
+    const geojson = storms[layerKey];
+
+    if (!geojson || !geojson.features) return;
+
+    const filtered = geojson.features.filter(f =>
+        f.properties.DTG <= globalDTG &&
+        f.properties.LAT != null &&
+        f.properties.LON != null
+    );
+
+    if (layers[layerKey]) {
+        map.removeLayer(layers[layerKey]);
+    }
+
+    if (filtered.length === 0) return;
+
+    // Manually convert to GeoJSON format with geometry from LAT/LON
+    const geojsonFixed = {
+        type: "FeatureCollection",
+        features: filtered.map(f => ({
+            type: "Feature",
+            properties: f.properties,
+            geometry: {
+                type: "Point",
+                coordinates: [f.properties.LON, f.properties.LAT]
+            }
+        }))
+    };
+
+    layers[layerKey] = L.geoJSON(geojsonFixed, {
+        pointToLayer: (feature, latlng) => L.marker(latlng, { icon: hurricaneIcon })
+    }).bindPopup(layer => getCustomPopup(`Hurricane ${stormName.charAt(0).toUpperCase() + stormName.slice(1)}`));
+
+    layers[layerKey].addTo(map);
+}
+
+
+
+function featureToStormName(feature) {
+    const props = feature.properties;
+    return props.STORMNAME ? props.STORMNAME.charAt(0).toUpperCase() + props.STORMNAME.slice(1).toLowerCase() : "Unknown";
+}
+
+
+// Setup sliders for each storm
+Object.keys(storms).forEach(storm => {
+    const dtgs = storms[storm].features.map(f => f.properties.DTG);
+    const min = Math.min(...dtgs);
+    const max = Math.max(...dtgs);
+
+    const slider = document.getElementById(`${storm}Slider`);
+    slider.min = min;
+    slider.max = max;
+    slider.value = min;
+
+    slider.addEventListener("input", () => {
+        renderStorm(storm, parseFloat(slider.value));
+        document.getElementById("globalSlider").value = slider.value; // Sync global
+        updateGlobalLabel();
+    });
+
+
+});
+
+//globalslider
+const globalSlider = document.getElementById("globalSlider");
+const globalLabel = document.getElementById("globalTimeLabel");
+
+globalSlider.value = 2024010100;
+globalSlider.dispatchEvent(new Event('input'));
+
+
+function updateGlobalLabel() {
+    const dtg = globalSlider.value.toString();
+    const year = dtg.slice(0, 4);
+    const month = dtg.slice(4, 6);
+    const day = dtg.slice(6, 8);
+    const hour = dtg.slice(8, 10);
+    globalLabel.textContent = `${year}-${month}-${day} ${hour}:00`;
+}
+
+globalSlider.addEventListener("input", () => {
+    const dtg = parseFloat(globalSlider.value);
+    Object.keys(storms).forEach(storm => {
+        renderStorm(storm, dtg); 
+        document.getElementById(`${storm}Slider`).value = dtg;
+    });
+    updateGlobalLabel();
+});
+
+
+// Animation logic
+let playing = false;
+let playInterval;
+
+document.getElementById("playPauseBtn").addEventListener("click", () => {
+    if (!playing) {
+        playing = true;
+        document.getElementById("playPauseBtn").textContent = "Pause";
+
+        playInterval = setInterval(() => {
+            let dtg = parseInt(globalSlider.value);
+            if (dtg >= 2024120100) {
+                clearInterval(playInterval);
+                playing = false;
+                document.getElementById("playPauseBtn").textContent = "Play";
+                return;
+            }
+            dtg += 100; // advance 6 hours (DTG intervals)
+            globalSlider.value = dtg;
+            globalSlider.dispatchEvent(new Event('input'));
+        }, 500);
+    } else {
+        playing = false;
+        clearInterval(playInterval);
+        document.getElementById("playPauseBtn").textContent = "Play";
+    }
+});
+
+    </script>
+</body>
+</html>

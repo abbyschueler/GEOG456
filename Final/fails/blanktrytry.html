@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Force State Extrusion Test</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+  <style>
+    body { margin: 0; }
+    #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+    #btn {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 999;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <button id="btn">Raise State</button>
+</body>
+
+<script>
+mapboxgl.accessToken = 'pk.eyJ1IjoiYWJieXNjaHVlbGVyIiwiYSI6ImNtM21mdml5djExN3Myam9maDd2YWkza2wifQ.yXzmVhjA9wFE71ocWWuQ-g'; // Replace with your token
+
+const map = new mapboxgl.Map({
+  container: 'map',
+  style: 'mapbox://styles/mapbox/light-v10',
+  center: [-83, 27],
+  zoom: 5,
+  pitch: 60
+});
+
+// Simple Florida polygon
+const stateGeojson = {
+  type: "FeatureCollection",
+  features: [{
+    type: "Feature",
+    properties: {
+      NAME: "Florida",
+      costs: 2500000000,
+      initialHeight: 0
+    },
+    geometry: {
+      type: "Polygon",
+      coordinates: [[
+        [-87, 30], [-87, 24], [-80, 24], [-80, 30], [-87, 30]
+      ]]
+    }
+  }]
+};
+
+map.on('load', () => {
+  // Add source
+  map.addSource('state', {
+    type: 'geojson',
+    data: stateGeojson
+  });
+
+  // Add 3D extrusion layer
+  map.addLayer({
+    id: 'state-3d',
+    type: 'fill-extrusion',
+    source: 'state',
+    paint: {
+      'fill-extrusion-color': '#0077be',
+      'fill-extrusion-height': ['get', 'initialHeight'],
+      'fill-extrusion-opacity': 0.7
+    }
+  });
+
+  // Button triggers extrusion
+  document.getElementById('btn').addEventListener('click', () => {
+    stateGeojson.features[0].properties.initialHeight = 50000;
+
+    // Re-set source to trigger update
+    map.getSource('state').setData(JSON.parse(JSON.stringify(stateGeojson)));
+  });
+});
+</script>
+</html>

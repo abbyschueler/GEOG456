@@ -1,0 +1,735 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              3.8518762329,
+              51.7539417754
+            ],
+            [
+              3.8516958713,
+              51.753921253
+            ],
+            [
+              3.8517733596,
+              51.7539852869
+            ],
+            [
+              3.8517513265,
+              51.754002798
+            ],
+            [
+              3.8518007801,
+              51.7540350901
+            ],
+            [
+              3.8519250864,
+              51.7539874544
+            ],
+            [
+              3.8518759304,
+              51.7539506714
+            ],
+            [
+              3.8518762329,
+              51.7539417754
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "ID": 1,
+        "roofAngle": 21,
+        "Place": "Ouddorp",
+        "height": 4,
+        "Additive": "",
+        "Postalcode": "3253MH",
+        "SecondAdditive": "",
+        "Street": "Ossenhoek",
+        "roofShape": "skillion",
+        "Housenumber": "2",
+        "roofDirection": 216,
+        "roofColor": "#ffab00",
+        "Area": 110.9
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              3.8519560195,
+              51.7539382358
+            ],
+            [
+              3.8519769952,
+              51.7539518155
+            ],
+            [
+              3.8520204744,
+              51.7539340458
+            ],
+            [
+              3.8519020569,
+              51.7538298308
+            ],
+            [
+              3.8518857702,
+              51.7538742969
+            ],
+            [
+              3.8519070262,
+              51.75388815
+            ],
+            [
+              3.8518779076,
+              51.7538925331
+            ],
+            [
+              3.8518693055,
+              51.753932515
+            ],
+            [
+              3.8519323378,
+              51.7539871898
+            ],
+            [
+              3.8519692847,
+              51.7539740992
+            ],
+            [
+              3.8519484748,
+              51.7539471268
+            ],
+            [
+              3.8519560195,
+              51.7539382358
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "ID": 2,
+        "roofAngle": 21,
+        "Place": "Ouddorp",
+        "height": 6,
+        "Additive": "",
+        "Postalcode": "3253MH",
+        "SecondAdditive": "",
+        "Street": "Ossenhoek",
+        "roofShape": "skillion",
+        "Housenumber": "2",
+        "roofDirection": 36,
+        "roofColor": "#fdd835",
+        "Area": "96.2"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              3.851812298,
+              51.7539093835
+            ],
+            [
+              3.8517830437,
+              51.7539134952
+            ],
+            [
+              3.8518055253,
+              51.7538913152
+            ],
+            [
+              3.8518780937,
+              51.7538742862
+            ],
+            [
+              3.8518933037,
+              51.7538295364
+            ],
+            [
+              3.8516901653,
+              51.7539122783
+            ],
+            [
+              3.8518620724,
+              51.7539322405
+            ],
+            [
+              3.8518771826,
+              51.7538882984
+            ],
+            [
+              3.8518193923,
+              51.7539094765
+            ],
+            [
+              3.851812298,
+              51.7539093835
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "ID": 3,
+        "roofAngle": 21,
+        "Place": "Ouddorp",
+        "height": 4,
+        "Additive": "",
+        "Postalcode": "3253MH",
+        "SecondAdditive": "",
+        "Street": "Ossenhoek",
+        "roofShape": "skillion",
+        "Housenumber": "2",
+        "roofDirection": 128,
+        "roofColor": "#aeea00",
+        "Area": 62.1
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              3.8520051627,
+              51.7539839185
+            ],
+            [
+              3.851976219,
+              51.7539746395
+            ],
+            [
+              3.8519039404,
+              51.7540044378
+            ],
+            [
+              3.8519731753,
+              51.7540641382
+            ],
+            [
+              3.8520307851,
+              51.7540695676
+            ],
+            [
+              3.852047076,
+              51.7540292369
+            ],
+            [
+              3.852005013,
+              51.7539883216
+            ],
+            [
+              3.8520051627,
+              51.7539839185
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "ID": 4,
+        "roofAngle": 30,
+        "Place": "Ouddorp",
+        "height": 6,
+        "Additive": "",
+        "Postalcode": "3253MH",
+        "SecondAdditive": "",
+        "Street": "Ossenhoek",
+        "roofShape": "flat",
+        "Housenumber": "2",
+        "roofDirection": 90,
+        "roofColor": "#00c853",
+        "Area": 61.3
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              3.8519098311,
+              51.754018629
+            ],
+            [
+              3.851895959,
+              51.7540048727
+            ],
+            [
+              3.8518300474,
+              51.7540220787
+            ],
+            [
+              3.8518950502,
+              51.7540273353
+            ],
+            [
+              3.8519377305,
+              51.7540500993
+            ],
+            [
+              3.8519096814,
+              51.7540230321
+            ],
+            [
+              3.8519098311,
+              51.754018629
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "ID": 5,
+        "roofAngle": 30,
+        "Place": "Ouddorp",
+        "height": 6,
+        "Additive": "",
+        "Postalcode": "3253MH",
+        "SecondAdditive": "",
+        "Street": "Ossenhoek",
+        "roofShape": "flat",
+        "Housenumber": "2",
+        "roofDirection": 90,
+        "roofColor": "#00c853",
+        "Area": 11.6
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              3.8518576411,
+              51.7540625348
+            ],
+            [
+              3.8518513176,
+              51.7540312573
+            ],
+            [
+              3.8518010639,
+              51.7540480392
+            ],
+            [
+              3.8518362119,
+              51.7540580289
+            ],
+            [
+              3.8518576411,
+              51.7540625348
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "ID": 6,
+        "roofAngle": 21,
+        "Place": "Ouddorp",
+        "height": 6,
+        "Additive": "",
+        "Postalcode": "3253MH",
+        "SecondAdditive": "",
+        "Street": "Ossenhoek",
+        "roofShape": "skillion",
+        "Housenumber": "2",
+        "roofDirection": 128,
+        "roofColor": "#aeea00",
+        "Area": 9
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              3.851812306,
+              51.7539048887
+            ],
+            [
+              3.8518409868,
+              51.7538878242
+            ],
+            [
+              3.8517905855,
+              51.7539046941
+            ],
+            [
+              3.8517973773,
+              51.753913683
+            ],
+            [
+              3.851812306,
+              51.7539048887
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "ID": 7,
+        "roofAngle": 59,
+        "Place": "Ouddorp",
+        "height": 6,
+        "Additive": "",
+        "Postalcode": "3253MH",
+        "SecondAdditive": "",
+        "Street": "Ossenhoek",
+        "roofShape": "skillion",
+        "Housenumber": "2",
+        "roofDirection": 135,
+        "roofColor": "#fdd835",
+        "Area": 7
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              3.8518865886,
+              51.7540631837
+            ],
+            [
+              3.8519232399,
+              51.754050269
+            ],
+            [
+              3.8519022672,
+              51.7540365995
+            ],
+            [
+              3.8518723918,
+              51.7540674927
+            ],
+            [
+              3.8518865886,
+              51.7540631837
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "ID": 8,
+        "roofAngle": 21,
+        "Place": "Ouddorp",
+        "height": 6,
+        "Additive": "",
+        "Postalcode": "3253MH",
+        "SecondAdditive": "",
+        "Street": "Ossenhoek",
+        "roofShape": "skillion",
+        "Housenumber": "2",
+        "roofDirection": 36,
+        "roofColor": "#fdd835",
+        "Area": 6.2
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              3.8518636784,
+              51.7540724128
+            ],
+            [
+              3.8518429927,
+              51.7540716024
+            ],
+            [
+              3.8518354559,
+              51.7540759986
+            ],
+            [
+              3.8518280739,
+              51.7540715868
+            ],
+            [
+              3.8518141727,
+              51.7540757198
+            ],
+            [
+              3.8518135886,
+              51.7540801171
+            ],
+            [
+              3.8518338415,
+              51.7540979126
+            ],
+            [
+              3.8518636784,
+              51.7540724128
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "ID": 9,
+        "roofAngle": 21,
+        "Place": "Ouddorp",
+        "height": 6,
+        "Additive": "",
+        "Postalcode": "3253MH",
+        "SecondAdditive": "",
+        "Street": "Ossenhoek",
+        "roofShape": "skillion",
+        "Housenumber": "2",
+        "roofDirection": 216,
+        "roofColor": "#ffab00",
+        "Area": 5.6
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              3.8518796581,
+              51.7540540132
+            ],
+            [
+              3.8518944631,
+              51.7540318225
+            ],
+            [
+              3.8518595519,
+              51.7540319046
+            ],
+            [
+              3.851864897,
+              51.7540621354
+            ],
+            [
+              3.8518796581,
+              51.7540540132
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "ID": 10,
+        "roofAngle": 23,
+        "Place": "Ouddorp",
+        "height": 6,
+        "Additive": "",
+        "Postalcode": "3253MH",
+        "SecondAdditive": "",
+        "Street": "Ossenhoek",
+        "roofShape": "skillion",
+        "Housenumber": "2",
+        "roofDirection": 77,
+        "roofColor": "#aeea00",
+        "Area": 5.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              3.8518285224,
+              51.7540669179
+            ],
+            [
+              3.8518493895,
+              51.7540666519
+            ],
+            [
+              3.8518012547,
+              51.754053076
+            ],
+            [
+              3.8518062157,
+              51.7540754357
+            ],
+            [
+              3.8518285224,
+              51.7540669179
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "ID": 11,
+        "roofAngle": 25,
+        "Place": "Ouddorp",
+        "height": 6,
+        "Additive": "",
+        "Postalcode": "3253MH",
+        "SecondAdditive": "",
+        "Street": "Ossenhoek",
+        "roofShape": "skillion",
+        "Housenumber": "2",
+        "roofDirection": 171,
+        "roofColor": "#fdd835",
+        "Area": 5.4
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              3.8518710406,
+              51.7540944444
+            ],
+            [
+              3.8518646961,
+              51.7540765615
+            ],
+            [
+              3.8518423654,
+              51.7540985637
+            ],
+            [
+              3.8518775398,
+              51.7541035194
+            ],
+            [
+              3.8518710406,
+              51.7540944444
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "ID": 12,
+        "roofAngle": 25,
+        "Place": "Ouddorp",
+        "height": 6,
+        "Additive": "",
+        "Postalcode": "3253MH",
+        "SecondAdditive": "",
+        "Street": "Ossenhoek",
+        "roofShape": "skillion",
+        "Housenumber": "2",
+        "roofDirection": 262,
+        "roofColor": "#ffab00",
+        "Area": 4.3
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              3.8519073924,
+              51.7540903358
+            ],
+            [
+              3.8519075391,
+              51.7540860226
+            ],
+            [
+              3.851872655,
+              51.7540725304
+            ],
+            [
+              3.8518787382,
+              51.7540810605
+            ],
+            [
+              3.8518782829,
+              51.7540944494
+            ],
+            [
+              3.8518924606,
+              51.7540992199
+            ],
+            [
+              3.8519073924,
+              51.7540903358
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "ID": 13,
+        "roofAngle": 24,
+        "Place": "Ouddorp",
+        "height": 6,
+        "Additive": "",
+        "Postalcode": "3253MH",
+        "SecondAdditive": "",
+        "Street": "Ossenhoek",
+        "roofShape": "skillion",
+        "Housenumber": "2",
+        "roofDirection": -52,
+        "roofColor": "#ffab00",
+        "Area": 3.9
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              3.8519150869,
+              51.7540770418
+            ],
+            [
+              3.8519227754,
+              51.7540639275
+            ],
+            [
+              3.8518799309,
+              51.7540715469
+            ],
+            [
+              3.851913931,
+              51.7540854771
+            ],
+            [
+              3.8519150869,
+              51.7540770418
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "ID": 14,
+        "roofAngle": 25,
+        "Place": "Ouddorp",
+        "height": 6,
+        "Additive": "",
+        "Postalcode": "3253MH",
+        "SecondAdditive": "",
+        "Street": "Ossenhoek",
+        "roofShape": "skillion",
+        "Housenumber": "2",
+        "roofDirection": -9,
+        "roofColor": "#ffab00",
+        "Area": 3.3
+      }
+    }
+  ]
+}

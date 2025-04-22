@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Hurricane Cost Animation</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+  <script src="https://unpkg.com/deck.gl@8.9.23/dist.min.js"></script>
+  <script src="berylpts.js"></script>
+  <script src="debbypts.js"></script>
+  <script src="helenepts.js"></script>
+  <script src="miltonpts.js"></script>
+  <script src="francinepts.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+
+  <style>
+    body, html { margin: 0; padding: 0; height: 100%; }
+    #map { position: absolute; width: 100%; height: 100%; }
+  </style>
+</head>
+<body>
+<div id="map"></div>
+<script>
+  mapboxgl.accessToken = 'pk.eyJ1IjoiYWJieXNjaHVlbGVyIiwiYSI6ImNtM21mdml5djExN3Myam9maDd2YWkza2wifQ.yXzmVhjA9wFE71ocWWuQ-g';
+///mapbox style
+  const map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/light-v11',
+    center: [-95, 37],
+    zoom: 3,
+    pitch: 45,
+    bearing: 0
+  });
+
+  ///adding mapbox tile dataset
+  map.on('load', async () => {
+    map.addSource('STATE', {
+      type: 'vector',
+      url: 'mapbox://abbyschueler.41m8hcne'
+    });
+
+  /// Adding 3D extrusion layer and differenctiating values 
+  map.addLayer({
+  id: '2024hurricanes_cost',
+  type: 'fill-extrusion',
+  source: 'STATE',
+  'source-layer': 'statecost2-7kci8r',
+  minzoom: 0,
+  paint: {
+  'fill-extrusion-color': [
+    'case',
+    ['!=', ['get', '2024hurricanes_cost'], null],
+    '#ff6600',  
+    '#cccccc'   
+  ],
+  'fill-extrusion-height': [
+    '*',
+    ['coalesce', ['to-number', ['get', '2024hurricanes_cost']], 0],
+    0.000001 
+  ],
+  'fill-extrusion-base': 0,
+  'fill-extrusion-opacity': 0.8
+}
+
+ });
+});
+
+</script>
+</body>
+</html>

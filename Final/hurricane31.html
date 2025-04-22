@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Billion Dollar Tropical Cyclones in 2024</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+  <script src="beryl.js"></script>
+  <script src="milton.js"></script>
+  <script src="debby.js"></script>
+  <script src="helene.js"></script>
+  <script src="francine.js"></script>
+  <style>
+    body, html { margin: 0; padding: 0; height: 100%; font-family: sans-serif; }
+    #map { position: absolute; top: 80px; bottom: 150px; width: 100%; }
+    #header { text-align: center; padding: 20px; font-size: 24px; font-weight: bold; background: #07060600; }
+    #storm-info { position: absolute; bottom: 0; width: 100%; background: #07060600; padding: 15px; box-shadow: 0 -2px 5px rgb(255, 255, 255); font-size: 14px; }
+    #slider-container, #controls, #total-damage-box {
+      background: rgb(247, 244, 244); border-radius: 5px; padding: 10px; font-size: 13px;
+    }
+    #slider-container, #controls {
+      position: absolute; left: 50%; transform: translateX(-50%);
+    }
+    #controls { bottom: 212px; }
+    #slider-container { bottom: 150px; }
+    #total-damage-box {
+      position: absolute; top: 80px; left: 50%;
+      transform: translateX(-50%); font-weight: bold;
+      background: white; padding: 8px 12px;
+      border-radius: 4px; font-size: 14px;
+    }
+    .legend { display: none; }
+  </style>
+</head>
+<body>
+<div id="header">Billion Dollar Tropical Cyclones that hit the United States in 2024</div>
+<div id="map"></div>
+<div id="slider-container">
+  <div id="time-label" style="text-align:center; font-weight:bold; margin-bottom:5px;">Time: </div>
+  <input id="slider" type="range" min="0" max="0" step="1" value="0" />
+</div>
+<div id="controls">
+  <label for="storm-select">Select Storm:</label>
+  <select id="storm-select">
+    <option value="beryl">Beryl</option>
+    <option value="francine">Francine</option>
+    <option value="debby">Debby</option>
+    <option value="helene">Helene</option>
+    <option value="milton">Milton</option>
+    <option value="cumulative">All Storms (total cost)</option>
+  </select>
+</div>
+<div id="total-damage-box">Total Damage: $0</div>
+<div id="storm-info"></div>
+
+<script>
+const stormDetails = {
+  beryl: "<strong>Hurricane Beryl</strong><br>Active: June 28 – July 5, 2024<br>Category 3<br>Major impacts to Puerto Rico, Texas, and Louisiana.<br>Estimated Damage: $7.4B",
+  milton: "<strong>Hurricane Milton</strong><br>Active: October 2024<br>Category 5<br>Severe damage across Florida.<br>Estimated Damage: $34.6B",
+  debby: "<strong>Hurricane Debby</strong><br>Active: August 3–9, 2024<br>Category 1<br>Wide-reaching storm, affected the Eastern U.S. and beyond.<br>Estimated Damage: $2.5B",
+  helene: "<strong>Hurricane Helene</strong><br>Active: September 23–27, 2024<br>Category 4<br>Massive destruction from Florida to North Carolina.<br>Estimated Damage: $79.5B",
+  francine: "<strong>Hurricane Francine</strong><br>Active: July 2024<br>Category 2<br>Major damage to Gulf Coast states including Louisiana, Mississippi, and Florida<br>Estimated Damage: $1.3B",
+  cumulative: "<strong>All Storms (Total Cost)</strong><br>This mode plays all storm points in order and builds cumulative damage over time."
+};
+
+const allStorms = { beryl, milton, debby, helene, francine };
+const stormOrder = ["beryl", "milton", "debby", "helene", "francine"];
+let usStatesData = null;
+let totalDamage = 0;
+let activePointIndex = -1;
+
+mapboxgl.accessToken = 'pk.eyJ1IjoiYWJieXNjaHVlbGVyIiwiYSI6ImNtM21mdml5djExN3Myam9maDd2YWkza2wifQ.yXzmVhjA9wFE71ocWWuQ-g';
+const map = new mapboxgl.Map({
+  container: 'map',
+  style: 'mapbox://styles/mapbox/dark-v11',
+  center: [-90.5, 38.5],
+  zoom: 3,
+  pitch: 20
+});
+
+const damageMatrix = {
+  beryl: { PuertoRico: 1200000000, Texas: 4500000000, NewYork: 70000000, Ohio: 33000000, Michigan: 40000000, Indiana: 23000000, Illinois: 19000000, Missouri: 18000000, Louisiana: 1200000000, Arkansas: 94000000, oklahoma: 180000000, Pennsylvania: 23000000 },
+  milton: { Florida: 32600000000, Georgia: 800000000, SouthCarolina: 1200000000 },
+  helene: { Florida: 20000000000, Georgia: 3700000000, SouthCarolina: 450000000, NorthCarolina: 50000000000, Virginia: 4000000000, Ohio: 15000000, Indiana: 15000000, Kentucky: 20000000, WestVirginia: 15000000, Tennessee: 1300000000, Alabama: 25000000 },
+  debby: { Florida: 687000000, Georgia: 550000000, SouthCarolina: 900000000, NorthCarolina: 300000000, Virginia: 15000000, Maryland: 6000000, NewJersey: 5000000, NewYork: 10000000, Pennsylvania: 10000000, Ohio: 8000000, WestVirginia: 9000000 },
+  francine: { Florida: 130000000, Georgia: 900000, Texas: 1100000, Alabama: 50000000, Mississippi: 93000000, Louisiana: 1000000000, Arkansas: 25000000 }
+};
+
+map.on('load', () => {
+  fetch('usstates.geojson')
+    .then(res => res.json())
+    .then(data => {
+      usStatesData = data;
+      resetStateProperties();
+      map.addSource('states', { type: 'geojson', data });
+      map.addLayer({
+        id: 'state-extrusions',
+        type: 'fill-extrusion',
+        source: 'states',
+        paint: {
+          'fill-extrusion-height': [
+            'interpolate', ['linear'], ['get', 'cumulativeDamage'],
+            0, 0, 1e7, 100000, 1e8, 400000,
+            5e8, 1000000, 2e9, 1800000, 5e10, 2500000, 1e11, 3200000
+          ],
+          'fill-extrusion-color': [
+            'interpolate', ['linear'], ['get', 'cumulativeDamage'],
+            0, '#cccccc', 1e7, '#ffeda0', 1e8, '#feb24c',
+            5e8, '#fd8d3c', 2e9, '#fc4e2a', 5e10, '#e31a1c', 1e11, '#b10026'
+          ],
+          'fill-extrusion-opacity': 0.85
+        }
+      });
+
+      map.addSource('current-point', {
+        type: 'geojson',
+        data: { type: 'FeatureCollection', features: [] }
+      });
+
+      map.addLayer({
+        id: 'storm-point',
+        type: 'circle',
+        source: 'current-point',
+        paint: { 'circle-radius': 6, 'circle-color': '#0000ff' }
+      });
+
+      setupSlider("beryl");
+    });
+});
+
+document.getElementById('storm-select').addEventListener('change', (e) => {
+  const storm = e.target.value;
+  document.getElementById('storm-info').innerHTML = stormDetails[storm];
+  resetStateProperties();
+  if (storm === "cumulative") {
+    setupCumulativeSlider();
+  } else {
+    setupSlider(storm);
+  }
+});
+
+function resetStateProperties() {
+  totalDamage = 0;
+  activePointIndex = -1;
+  usStatesData.features.forEach(f => {
+    f.properties.cumulativeDamage = 0;
+    f.properties.hitStorms = {};
+  });
+  document.getElementById('total-damage-box').textContent = 'Total Damage: $0';
+  map.getSource('states')?.setData(usStatesData);
+}
+
+function setupSlider(stormName) {
+  const slider = document.getElementById("slider");
+  const storm = allStorms[stormName];
+  slider.max = storm.features.length - 1;
+  slider.value = 0;
+  activePointIndex = -1;
+
+  updateStormPoint(storm.features[0]);
+  updateTimeLabel(storm.features[0].properties.DTG);
+
+  slider.oninput = () => {
+    const index = parseInt(slider.value);
+    if (index === activePointIndex) return;
+    activePointIndex = index;
+    const feature = storm.features[index];
+    updateStormPoint(feature);
+    updateTimeLabel(feature.properties.DTG);
+    checkStateIntersection(feature, stormName);
+  };
+}
+
+function setupCumulativeSlider() {
+  const allPoints = stormOrder.flatMap(name => allStorms[name].features.map(f => ({ ...f, properties: { ...f.properties, storm: name } })));
+  allPoints.sort((a, b) => a.properties.DTG - b.properties.DTG);
+
+  const slider = document.getElementById("slider");
+  slider.max = allPoints.length - 1;
+  slider.value = 0;
+  activePointIndex = -1;
+
+  updateStormPoint(allPoints[0]);
+  updateTimeLabel(allPoints[0].properties.DTG);
+
+  slider.oninput = () => {
+    const index = parseInt(slider.value);
+    if (index === activePointIndex) return;
+    activePointIndex = index;
+    const feature = allPoints[index];
+    updateStormPoint(feature);
+    updateTimeLabel(feature.properties.DTG);
+    checkStateIntersection(feature, feature.properties.storm);
+  };
+}
+
+function updateTimeLabel(dtg) {
+  const label = dtg
+    ? `Time: ${dtg.toString().padStart(10, '0').replace(/(\\d{4})(\\d{2})(\\d{2})(\\d{2})/, '$1-$2-$3 $4:00')}`
+    : "Time: N/A";
+  document.getElementById('time-label').textContent = label;
+}
+
+function updateStormPoint(feature) {
+  map.getSource("current-point").setData({ type: "FeatureCollection", features: [feature] });
+}
+
+function checkStateIntersection(feature, stormName) {
+  const point = turf.point(feature.geometry.coordinates);
+  const stormDamage = damageMatrix[stormName] || {};
+  let updated = false;
+
+  usStatesData.features.forEach(state => {
+    const name = state.properties.NAME;
+    const cost = stormDamage[name] || stormDamage[name.toLowerCase()] || 0;
+    if (cost > 0 && !state.properties.hitStorms[stormName] && turf.booleanPointInPolygon(point, state)) {
+      state.properties.hitStorms[stormName] = true;
+      state.properties.cumulativeDamage += cost;
+      totalDamage += cost;
+      updated = true;
+    }
+  });
+
+  if (updated) {
+    map.getSource("states").setData(usStatesData);
+    document.getElementById('total-damage-box').textContent =
+      `Total Damage: $${totalDamage.toLocaleString()}`;
+  }
+}
+
+let popup;
+map.on('mousemove', 'state-extrusions', (e) => {
+  const state = e.features[0];
+  const cost = state.properties.cumulativeDamage;
+  if (cost > 0) {
+    const name = state.properties.NAME;
+    map.getCanvas().style.cursor = 'pointer';
+    if (popup) popup.remove();
+    popup = new mapboxgl.Popup({ closeButton: false })
+      .setLngLat(e.lngLat)
+      .setHTML(`<strong>${name}</strong><br>Total Damage: $${cost.toLocaleString()}`)
+      .addTo(map);
+  } else {
+    if (popup) popup.remove();
+    map.getCanvas().style.cursor = '';
+  }
+});
+map.on('mouseleave', 'state-extrusions', () => {
+  if (popup) popup.remove();
+  map.getCanvas().style.cursor = '';
+});
+</script>
+</body>
+</html>

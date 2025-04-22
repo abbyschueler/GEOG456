@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Hurricane Cost Animation</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+  <script src="berylpts.js"></script>
+  <script src="debbypts.js"></script>
+  <script src="helenepts.js"></script>
+  <script src="miltonpts.js"></script>
+  <script src="francinepts.js"></script>
+  <style>
+    body, html { margin: 0; padding: 0; height: 100%; }
+    #map { position: absolute; width: 100%; height: 100%; }
+    #time-slider {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 999;
+      width: 300px;
+    }
+  </style>
+</head>
+<body>
+<div id="map"></div>
+<input id="time-slider" type="range" min="0" max="100" value="0" step="1">
+
+<script>
+  mapboxgl.accessToken = 'pk.eyJ1IjoiYWJieXNjaHVlbGVyIiwiYSI6ImNtM21mdml5djExN3Myam9maDd2YWkza2wifQ.yXzmVhjA9wFE71ocWWuQ-g';
+
+  const map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/light-v11',
+    center: [-95, 37],
+    zoom: 3,
+    pitch: 60,
+    bearing: -20,
+    antialias: true
+  });
+
+  map.on('load', () => {
+    fetch('us_states.geojson')
+      .then(res => res.json())
+      .then(data => {
+        // Start with zero costs
+        data.features.forEach(f => f.properties.costs = 0);
+
+        map.addSource('states', {
+          type: 'geojson',
+          data: data
+        });
+
+        map.addLayer({
+          id: 'state-extrusions',
+          type: 'fill-extrusion',
+          source: 'states',
+          paint: {
+            'fill-extrusion-color': [
+              'interpolate',
+              ['linear'],
+              ['get', 'costs'],
+              0, '#cccccc',
+              10000000, '#ffcc99',
+              500000000, '#ff9966',
+              1000000000, '#ff6600',
+              20000000000, '#cc3300'
+            ],
+            'fill-extrusion-height': [
+              'interpolate', ['linear'], ['get', 'costs'],
+              0, 0,
+              50000000, 5000,
+              20000000000, 20000
+            ],
+            'fill-extrusion-base': 0,
+            'fill-extrusion-opacity': 0.85
+          }
+        });
+
+        // Add hurricane paths
+        const hurricanes = [miltonpts, berylpts, debbypts, helenepts, francinepts];
+        hurricanes.forEach((storm, i) => {
+          map.addSource(`storm${i}`, {
+            type: 'geojson',
+            data: storm
+          });
+
+          map.addLayer({
+            id: `storm${i}-points`,
+            type: 'circle',
+            source: `storm${i}`,
+            paint: {
+              'circle-radius': 4,
+              'circle-color': '#0000ff'
+            }
+          });
+        });
+
+        // Animate Milton
+        const storm = miltonpts;
+        const slider = document.getElementById('time-slider');
+        slider.max = storm.features.length - 1;
+
+        let lastStatesIn = new Set();
+
+        slider.addEventListener('input', () => {
+          const index = parseInt(slider.value);
+          const point = storm.features[index];
+          if (point && point.geometry) {
+            const coord = point.geometry.coordinates;
+            showPointAsCircle(coord);
+            raiseStatesAfterPassing(coord);
+          }
+        });
+
+        function showPointAsCircle(coord) {
+          const geojson = {
+            type: 'FeatureCollection',
+            features: [{ type: 'Feature', geometry: { type: 'Point', coordinates: coord } }]
+          };
+
+          if (map.getSource('current-point')) {
+            map.getSource('current-point').setData(geojson);
+          } else {
+            map.addSource('current-point', { type: 'geojson', data: geojson });
+            map.addLayer({
+              id: 'current-point',
+              type: 'circle',
+              source: 'current-point',
+              paint: {
+                'circle-radius': 6,
+                'circle-color': '#ff0000'
+              }
+            });
+          }
+        }
+
+        function raiseStatesAfterPassing(coord) {
+          const statesSource = map.getSource('states');
+          const stateData = JSON.parse(JSON.stringify(statesSource._data));
+          const point = turf.point(coord);
+          const currentStatesIn = new Set();
+
+          stateData.features.forEach(feature => {
+            const polygon = turf.multiPolygon(feature.geometry.coordinates);
+            if (turf.booleanPointInPolygon(point, polygon)) {
+              currentStatesIn.add(feature.properties.NAME);
+            }
+          });
+
+          lastStatesIn.forEach(prevState => {
+            if (!currentStatesIn.has(prevState)) {
+              const feature = stateData.features.find(f => f.properties.NAME === prevState);
+              if (feature) {
+                feature.properties.costs = Math.min((feature.properties.costs || 0) + 50000000, 20000000000);
+                if (feature.properties.NAME === "Florida") {
+                  console.log("Florida cost:", feature.properties.costs);
+                }
+              }
+            }
+          });
+
+          lastStatesIn = currentStatesIn;
+          statesSource.setData(stateData);
+        }
+      });
+  });
+</script>
+</body>
+</html>

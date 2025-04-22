@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Hurricane Slider Animation</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+  <script src="beryl.js"></script>
+  <script src="milton.js"></script>
+  <script src="debby.js"></script>
+  <script src="helene.js"></script>
+  <script src="francine.js"></script>
+  <style>
+    body, html { margin: 0; padding: 0; height: 100%; }
+    #map { position: absolute; top: 0; bottom: 50px; width: 100%; }
+    #slider-container {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    #controls {
+      position: absolute;
+      bottom: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      padding: 8px;
+      border-radius: 5px;
+    }
+
+.pulse-marker {
+  width: 20px;
+  height: 20px;
+  background: rgba(0, 122, 255, 0.6);
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgba(0, 122, 255, 0.9);
+  animation: pulse 1.5s infinite;
+}
+@keyframes pulse {
+  0% { transform: scale(0.95); opacity: 1; }
+  70% { transform: scale(1.2); opacity: 0; }
+  100% { transform: scale(0.95); opacity: 0; }
+}
+
+  </style>
+</head>
+<body>
+<div id="map"></div>
+
+<!-- Slider -->
+<div id="slider-container">
+  <div id="time-label" style="text-align:center; font-weight:bold; margin-bottom:5px;">Time: </div>
+  <input id="slider" type="range" min="0" max="0" step="1" value="0" />
+</div>
+
+<!-- Storm Selector -->
+<div id="controls">
+  <label for="storm-select">Select Storm:</label>
+  <select id="storm-select">
+    <option value="beryl">Beryl</option>
+    <option value="milton">Milton</option>
+    <option value="debby">Debby</option>
+    <option value="helene">Helene</option>
+    <option value="francine">Francine</option>
+  </select>
+</div>
+
+<div style="position:absolute; bottom:160px; left:10px; background:white; padding:10px; font-size:12px;">
+  <strong>Damage ($)</strong><br>
+  <div><span style="background:#ffeda0; width:10px; height:10px; display:inline-block"></span> > $10M</div>
+  <div><span style="background:#fc4e2a; width:10px; height:10px; display:inline-block"></span> > $2B</div>
+  ...
+</div>
+
+
+<script>
+mapboxgl.accessToken = 'pk.eyJ1IjoiYWJieXNjaHVlbGVyIiwiYSI6ImNtM21mdml5djExN3Myam9maDd2YWkza2wifQ.yXzmVhjA9wFE71ocWWuQ-g';
+
+const allStorms = { beryl, milton, debby, helene, francine };
+
+const damageMatrix = {
+  beryl: { PuertoRico: 500000000, Texas: 9400000000, NewYork: 150000000, Ohio: 150000000, Michigan: 50000000, Indiana: 15000000, Illinois: 10000000, Missouri: 15000000, Louisiana: 250000000, Arkansas: 15000000, oklahoma: 15000000, Pennsylvania: 10000000 },
+  milton: { Florida: 85000000000, Georgia: 310000000, SouthCarolina: 570000000 },
+  helene: { Florida: 20100000000, Georgia: 7000000000, SouthCarolina: 453000000, NorthCarolina: 59600000000, Virginia: 4400000000, Ohio: 15000000, Indiana: 15000000, Kentucky: 25000000, WestVirginia: 15000000, Tennessee: 1350000000, Alabama: 25000000 },
+  debby: { Florida: 2500000000, Georgia: 1200000000, SouthCarolina: 1000000000, NorthCarolina: 700000000, Virginia: 15000000, Maryland: 10000000, NewJersey: 9000000, NewYork: 15000000, Pennsylvania: 11000000, Ohio: 9000000, WestVirginia: 8000000 },
+  francine: { Florida: 500000000, Georgia: 1000000, Texas: 5000000, Alabama: 100000000, Mississippi: 29000000, Louisiana: 2000000000, Arkansas: 25000000 }
+};
+
+let map, usStatesData = null;
+let storm = beryl;
+let activePointIndex = -1;
+
+map = new mapboxgl.Map({
+  container: 'map',
+  style: 'mapbox://styles/mapbox/dark-v11',
+  center: [-80, 30],
+  zoom: 4,
+  pitch: 45
+});
+
+map.on('load', () => {
+  fetch('usstates.geojson')
+    .then(res => res.json())
+    .then(data => {
+      usStatesData = data;
+      map.addSource('states', { type: 'geojson', data: usStatesData });
+
+      map.addLayer({
+        id: 'state-extrusions',
+        type: 'fill-extrusion',
+        source: 'states',
+        paint: {
+          'fill-extrusion-color': [
+            'interpolate', ['linear'], ['get', 'costs'],
+            0, '#cccccc',
+            1e7, '#ffeda0',
+            1e8, '#feb24c',
+            5e8, '#fd8d3c',
+            2e9, '#fc4e2a',
+            5e10, '#e31a1c',
+            1e11, '#b10026'
+          ],
+          'fill-extrusion-height': [
+            'interpolate', ['linear'], ['get', 'costs'],
+            0, 0,
+            1e7, 100000,
+            1e8, 400000,
+            5e8, 1000000,
+            2e9, 1800000,
+            5e10, 2500000,
+            1e11, 3200000
+          ],
+          'fill-extrusion-base': 0,
+          'fill-extrusion-opacity': 0.85
+        }
+      });
+
+      map.addSource('current-point', {
+        type: 'geojson',
+        data: { type: 'FeatureCollection', features: [] }
+      });
+
+      map.addLayer({
+        id: 'storm-point',
+        type: 'circle',
+        source: 'current-point',
+        paint: {
+          'circle-radius': 6,
+          'circle-color': '#0000ff'
+        }
+      });
+
+      setupSlider('beryl');
+      document.getElementById('storm-select').addEventListener('change', e => {
+        setupSlider(e.target.value);
+      });
+    });
+});
+
+
+
+function updateTimeLabel(dtg) {
+  if (!dtg) {
+    document.getElementById('time-label').textContent = 'Time: N/A';
+    return;
+  }
+  const dtgStr = dtg.toString().padStart(10, '0');
+  const year = dtgStr.slice(0, 4);
+  const month = dtgStr.slice(4, 6);
+  const day = dtgStr.slice(6, 8);
+  const hour = dtgStr.slice(8, 10);
+  const label = `Time: ${year}-${month}-${day} ${hour}:00`;
+  document.getElementById('time-label').textContent = label;
+}
+
+function setupSlider(stormName) {
+  storm = allStorms[stormName];
+  const slider = document.getElementById('slider');
+  slider.max = storm.features.length - 1;
+  slider.value = 0;
+  activePointIndex = -1;
+
+  resetStateCosts();
+
+  const firstFeature = storm.features[0];
+  updateStormPoint(firstFeature);
+  updateTimeLabel(firstFeature.properties.DTG);
+
+  slider.oninput = () => {
+    const index = parseInt(slider.value);
+    if (index === activePointIndex) return;
+    activePointIndex = index;
+
+    const feature = storm.features[index];
+    updateTimeLabel(feature.properties.DTG);
+    updateStormPoint(feature);
+    checkStateIntersection(feature, stormName);
+  };
+}
+
+function updateStormPoint(feature) {
+  const pointGeoJSON = {
+    type: 'FeatureCollection',
+    features: [feature]
+  };
+  map.getSource('current-point').setData(pointGeoJSON);
+}
+
+function resetStateCosts() {
+  usStatesData.features.forEach(f => f.properties.costs = 0);
+  map.getSource('states').setData(usStatesData);
+}
+
+function checkStateIntersection(feature, stormName) {
+  const point = turf.point(feature.geometry.coordinates);
+  const stormDamage = damageMatrix[stormName] || {};
+
+  let updated = false;
+
+  usStatesData.features.forEach(state => {
+    const name = state.properties.NAME;
+    const oldCost = state.properties.costs || 0;
+    const newCost = stormDamage[name] || 0;
+
+    if (turf.booleanPointInPolygon(point, state)) {
+      if (newCost > 0 && oldCost === 0) {
+        state.properties.costs = newCost;
+        updated = true;
+        console.log(`Storm ${stormName} hit ${name}, cost: $${newCost}`);
+      }
+    }
+  });
+
+  if (updated) {
+    map.getSource('states').setData(usStatesData);
+  }
+}
+
+let popup;
+
+map.on('mousemove', 'state-extrusions', (e) => {
+  const state = e.features[0];
+  const cost = state.properties.costs;
+
+  // Only show popup if the state has non-zero damage
+  if (cost > 0) {
+    const name = state.properties.NAME;
+    map.getCanvas().style.cursor = 'pointer';
+
+    if (popup) popup.remove(); // Remove existing popup if any
+
+    popup = new mapboxgl.Popup({ closeButton: false })
+      .setLngLat(e.lngLat)
+      .setHTML(`<strong>${name}</strong><br>Cost: $${cost.toLocaleString()}`)
+      .addTo(map);
+  } else {
+    if (popup) popup.remove();
+    map.getCanvas().style.cursor = '';
+  }
+});
+
+map.on('mouseleave', 'state-extrusions', () => {
+  if (popup) popup.remove();
+  map.getCanvas().style.cursor = '';
+});
+
+
+</script>
+</body>
+</html>

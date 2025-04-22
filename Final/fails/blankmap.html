@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Working 3D Hurricane Demo</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+  <style>
+    body { margin: 0; }
+    #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+    #timeSlider {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 999;
+      width: 300px;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <input id="timeSlider" type="range" min="0" max="100" value="0" />
+</body>
+
+<script>
+mapboxgl.accessToken = '/Users/abbyschueler/Desktop/GEOG456/Final/blanktrytry.html'; // <-- Replace with your token
+
+const map = new mapboxgl.Map({
+  container: 'map',
+  style: 'mapbox://styles/mapbox/light-v10',
+  center: [-81.5, 28],
+  zoom: 5,
+  pitch: 45
+});
+
+// Mock state: Florida
+const stateGeojson = {
+  type: "FeatureCollection",
+  features: [{
+    type: "Feature",
+    properties: {
+      NAME: "Florida",
+      costs: 2500000000,
+      initialHeight: 0
+    },
+    geometry: {
+      type: "Polygon",
+      coordinates: [[
+        [-87, 30], [-87, 24], [-80, 24], [-80, 30], [-87, 30]
+      ]]
+    }
+  }]
+};
+
+// Mock hurricane: 3 points from sea to land
+const stormGeojson = {
+  type: "FeatureCollection",
+  features: [
+    { type: "Feature", properties: { DTG: 1 }, geometry: { type: "Point", coordinates: [-84, 27] }},
+    { type: "Feature", properties: { DTG: 2 }, geometry: { type: "Point", coordinates: [-83, 27.5] }},
+    { type: "Feature", properties: { DTG: 3 }, geometry: { type: "Point", coordinates: [-82, 28] }}
+  ]
+};
+
+let touched = false;
+
+map.on('load', () => {
+  // Add state
+  map.addSource('state', {
+    type: 'geojson',
+    data: stateGeojson
+  });
+
+  map.addLayer({
+    id: 'state-3d',
+    type: 'fill-extrusion',
+    source: 'state',
+    paint: {
+      'fill-extrusion-color': ['case', ['>', ['get', 'initialHeight'], 0], '#ff0000', '#0077be'],
+      'fill-extrusion-height': ['get', '500000'],
+      'fill-extrusion-opacity': 0.6
+    }
+  });
+
+  // Add storm
+  map.addSource('storm', {
+    type: 'geojson',
+    data: {
+      type: "FeatureCollection",
+      features: []
+    }
+  });
+
+  map.addLayer({
+    id: 'storm-points',
+    type: 'circle',
+    source: 'storm',
+    paint: {
+      'circle-radius': 6,
+      'circle-color': '#ff6600'
+    }
+  });
+
+  document.getElementById('timeSlider').addEventListener('input', e => {
+    const val = parseInt(e.target.value);
+    const visible = stormGeojson.features.slice(0, Math.ceil((val / 100) * stormGeojson.features.length));
+
+    map.getSource('storm').setData({ type: "FeatureCollection", features: visible });
+
+    if (!touched) {
+      visible.forEach(pt => {
+        const state = stateGeojson.features[0];
+        if (turf.booleanPointInPolygon(pt, state)) {
+          state.properties.initialHeight = scaleCost(state.properties.costs);
+          map.getSource('state').setData(JSON.parse(JSON.stringify(stateGeojson)));
+
+          touched = true;
+
+          new mapboxgl.Popup()
+            .setLngLat(pt.geometry.coordinates)
+            .setHTML(`<b>Storm hits Florida</b><br>Cost: $${state.properties.costs.toLocaleString()}`)
+            .addTo(map);
+
+          map.getSource('state').setData(stateGeojson);
+        }
+      });
+    }
+  });
+});
+
+function scaleCost(cost) {
+  return Math.min(cost / 1e7, 120000); // scale height
+}
+</script>
+</html>

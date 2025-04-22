@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Hurricane Slider Animation</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+  <script src="berylpts.js"></script>
+  <script src="miltonpts.js"></script>
+  <script src="debbypts.js"></script>
+  <script src="helenepts.js"></script>
+  <script src="francinepts.js"></script>
+  <style>
+    body, html { margin: 0; padding: 0; height: 100%; }
+    #map { position: absolute; top: 0; bottom: 50px; width: 100%; }
+    #slider-container {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    #controls {
+      position: absolute;
+      bottom: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      padding: 8px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+<div id="map"></div>
+
+<!-- Slider -->
+<div id="slider-container">
+  <input id="slider" type="range" min="0" max="0" step="0.5" value="0" />
+</div>
+
+<!-- Storm Selector -->
+<div id="controls">
+  <label for="storm-select">Select Storm:</label>
+  <select id="storm-select">
+    <option value="beryl">Beryl</option>
+    <option value="milton">Milton</option>
+    <option value="debby">Debby</option>
+    <option value="helene">Helene</option>
+    <option value="francine">Francine</option>
+  </select>
+</div>
+
+<script>
+  mapboxgl.accessToken = 'pk.eyJ1IjoiYWJieXNjaHVlbGVyIiwiYSI6ImNtM21mdml5djExN3Myam9maDd2YWkza2wifQ.yXzmVhjA9wFE71ocWWuQ-g';
+
+  const allStorms = {
+    beryl: berylpts,
+    milton: miltonpts,
+    debby: debbypts,
+    helene: helenepts,
+    francine: francinepts
+  };
+
+  const damageMatrix = {
+    beryl: {
+      PuertoRico: 100000,
+      Texas: 1000000000,
+      NewYork: 93,
+      Ohio: 1,
+      Michigan: 9,
+      Indiana: 9,
+      Illinois: 9,
+      Missouri: 0,
+      Louisiana: 0
+    },
+    milton: {
+      Florida: 300000000
+    },
+    helene: {
+      Florida: 500000000,
+      Georgia: 500000,
+      SouthCarolina: 700000000,
+      NorthCarolina: 299999,
+      Virginia: 39999,
+      Ohio: 89,
+      Indiana: 90,
+      Kentucky: 9,
+      WestVirginia: 9,
+      Tennessee: 1,
+      Alabama: 1
+    },
+    debby: {
+      Florida: 1200000000,
+      Georgia: 400000000,
+      SouthCarolina: 30000,
+      NorthCarolina: 300000,
+      Virginia: 3999,
+      Maryland: 200,
+      NewJersey: 30,
+      NewYork: 8,
+      Pennsylvania: 29,
+      Ohio: 9
+    },
+    francine: {
+      Florida: 2000000,
+      Georgia: 600000000,
+      Texas: 500000000,
+      Alabama: 1,
+      Mississippi: 29,
+      Louisiana: 9
+    }};
+
+  let map, usStatesData = null;
+  let storm = berylpts;
+  let activePointIndex = -1;
+
+  // Initialize map
+  map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/light-v11',
+    center: [-80, 30],
+    zoom: 4,
+    pitch: 45
+  });
+
+  map.on('load', () => {
+    // Load state data
+    fetch('usstates.geojson')
+      .then(res => res.json())
+      .then(data => {
+        usStatesData = data;
+
+        // Add state extrusion source and layer
+        map.addSource('states', { type: 'geojson', data: usStatesData });
+
+        map.addLayer({
+          id: 'state-extrusions',
+          type: 'fill-extrusion',
+          source: 'states',
+          paint: {
+            'fill-extrusion-color': [
+              'interpolate', ['linear'], ['get', 'costs'],
+              0, '#cccccc',
+              10000000, '#ffcc99',
+              500000000, '#ff9966',
+              1000000000, '#ff6600',
+              20000000000, '#cc3300'
+            ],
+            'fill-extrusion-height': [
+              'interpolate', ['linear'], ['get', 'costs'],
+              0, 0,
+              1000000000, 2000000
+            ],
+            'fill-extrusion-base': 0,
+            'fill-extrusion-opacity': 0.85
+          }
+        });
+
+        // Add current hurricane point source and layer
+        map.addSource('current-point', {
+          type: 'geojson',
+          data: { type: 'FeatureCollection', features: [] }
+        });
+
+        map.addLayer({
+          id: 'storm-point',
+          type: 'circle',
+          source: 'current-point',
+          paint: {
+            'circle-radius': 6,
+            'circle-color': '#0000ff'
+          }
+        });
+
+        // Setup initial UI
+        setupSlider('beryl');
+        document.getElementById('storm-select').addEventListener('change', e => {
+          setupSlider(e.target.value);
+        });
+      });
+  });
+
+  function setupSlider(stormName) {
+    storm = allStorms[stormName];
+    const slider = document.getElementById('slider');
+    slider.max = storm.features.length - 1;
+    slider.value = 0;
+    activePointIndex = -1;
+
+    resetStateCosts();
+    updateStormPoint(storm.features[0]);
+
+    slider.oninput = () => {
+      const index = parseInt(slider.value);
+      if (index === activePointIndex) return;
+      activePointIndex = index;
+
+      const feature = storm.features[index];
+      updateStormPoint(feature);
+      checkStateIntersection(feature, stormName);
+    };
+  }
+
+  function updateStormPoint(feature) {
+    const pointGeoJSON = {
+      type: 'FeatureCollection',
+      features: [feature]
+    };
+    map.getSource('current-point').setData(pointGeoJSON);
+  }
+
+  function resetStateCosts() {
+    usStatesData.features.forEach(f => f.properties.costs = 0);
+    map.getSource('states').setData(usStatesData);
+  }
+
+  function checkStateIntersection(feature, stormName) {
+    const point = turf.point(feature.geometry.coordinates);
+    const stormDamage = damageMatrix[stormName] || {};
+    console.log(`📍 Checking point for ${stormName}:`, feature.geometry.coordinates);
+
+    let updated = false;
+
+    usStatesData.features.forEach(state => {
+      const name = state.properties.NAME;
+      const oldCost = state.properties.costs || 0;
+      const newCost = stormDamage[name] || 0;
+
+      if (turf.booleanPointInPolygon(point, state)) {
+        if (newCost > 0 && oldCost === 0) {
+          state.properties.costs = newCost;
+          updated = true;
+          console.log(`Storm ${stormName} hit ${name}, cost: $${newCost}`);
+        }
+      }
+    });
+
+    if (updated) {
+      map.getSource('states').setData(usStatesData);
+    }
+  }
+</script>
+</body>
+</html>

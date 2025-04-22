@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Hurricane Cost Animation – Beryl</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+  <script src="berylpts.js"></script> <!-- assumes this defines a `berylpts` variable -->
+</head>
+<body>
+  <div id="map" style="width: 100%; height: 100vh;"></div>
+  <input id="timeSlider" type="range" min="0" max="100" value="0" style="position: absolute; top: 10px; left: 10px; z-index: 1;" />
+</body>
+
+<script>
+  mapboxgl.accessToken = 'pk.eyJ1IjoiYWJieXNjaHVlbGVyIiwiYSI6ImNtM21mdml5djExN3Myam9maDd2YWkza2wifQ.yXzmVhjA9wFE71ocWWuQ-g';
+
+  const map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/light-v10',
+    center: [-90, 30],
+    zoom: 4,
+    pitch: 45
+  });
+
+  let statesGeojson;
+
+  map.on('load', async () => {
+    // Load US states with cost data
+    const response = await fetch('us_states.geojson');
+    statesGeojson = await response.json();
+
+    // Initialize height to zero
+    statesGeojson.features.forEach(f => f.properties.initialHeight = 0);
+
+    map.addSource('states', {
+      type: 'geojson',
+      data: statesGeojson
+    });
+
+    map.addLayer({
+      id: 'states-3d',
+      type: 'fill-extrusion',
+      source: 'states',
+      paint: {
+        'fill-extrusion-color': [
+  'case',
+  ['>', ['get', 'initialHeight'], 0], '#ff0000', // red if affected
+  '#0077be' // default blue
+]
+
+      }
+    });
+
+    // Add Beryl points
+    map.addSource('beryl', {
+      type: 'geojson',
+      data: berylpts
+    });
+
+    map.addLayer({
+      id: 'berylpts',
+      type: 'circle',
+      source: 'beryl',
+      paint: {
+        'circle-radius': 5,
+        'circle-color': '#ff6600'
+      }
+    });
+
+    // Slider interaction
+    document.getElementById('timeSlider').addEventListener('input', e => {
+      const sliderVal = parseInt(e.target.value);
+      updateBerylProgress(sliderVal);
+    });
+  });
+
+  function updateBerylProgress(sliderVal) {
+    // Get the total number of Beryl points
+    const totalPoints = berylpts.features.length;
+    const index = Math.floor((sliderVal / 100) * totalPoints);
+    const visiblePoints = berylpts.features.slice(0, index + 1);
+
+    // Filter visible Beryl points on the map
+    map.getSource('beryl').setData({
+      type: 'FeatureCollection',
+      features: visiblePoints
+    });
+
+    // Update state extrusion heights
+    let touchedStates = new Set();
+
+    visiblePoints.forEach(pt => {
+      statesGeojson.features.forEach(state => {
+        if (!touchedStates.has(state.properties.NAME)) {
+          if (turf.booleanPointInPolygon(pt, state)) {
+            state.properties.initialHeight = scaleCost(state.properties.costs);
+            touchedStates.add(state.properties.NAME);
+          }
+        }
+      });
+    });
+
+    map.getSource('states').setData(statesGeojson);
+  }
+
+  function scaleCost(cost) {
+    if (!cost || cost <= 0) return 0;
+    return Math.min(cost / 10000000, 100000); // scale appropriately
+  }
+</script>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Hurricane Cost Animation</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+  <script src="https://unpkg.com/deck.gl@8.9.23/dist.min.js"></script>
+  <script src="berylpts.js"></script>
+  <script src="debbypts.js"></script>
+  <script src="helenepts.js"></script>
+  <script src="miltonpts.js"></script>
+  <script src="francinepts.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+
+  <style>
+    body, html { margin: 0; padding: 0; height: 100%; }
+    #map { position: absolute; width: 100%; height: 100%; }
+  </style>
+</head>
+<body>
+<div id="map"></div>
+<script>
+  mapboxgl.accessToken = 'pk.eyJ1IjoiYWJieXNjaHVlbGVyIiwiYSI6ImNtM21mdml5djExN3Myam9maDd2YWkza2wifQ.yXzmVhjA9wFE71ocWWuQ-g';
+
+  const map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/light-v11',
+    center: [-95, 37],
+    zoom: 3,
+    pitch: 45,
+    bearing: 0
+  });
+
+  // 🔥 FIX: everything inside here
+  map.on('load', () => {
+    // Add US states with initial costs
+    map.addSource('states', {
+      type: 'geojson',
+      data: 'us_states.geojson' // make sure this is served correctly!
+    });
+
+    map.addLayer({
+      id: 'state-extrusions',
+      type: 'fill-extrusion',
+      source: 'states',
+      paint: {
+        'fill-extrusion-color': '#ff6600',
+        'fill-extrusion-height': ['*', ['get', 'costs'], 0.001],
+        'fill-extrusion-base': 0,
+        'fill-extrusion-opacity': 0.85
+      }
+    });
+
+    // Add hurricane points
+    const hurricanes = [miltonpts, berylpts, debbypts, helenepts, francinepts];
+
+    hurricanes.forEach((storm, i) => {
+      map.addSource(`storm${i}`, {
+        type: 'geojson',
+        data: storm
+      });
+
+      map.addLayer({
+        id: `storm${i}-points`,
+        type: 'circle',
+        source: `storm${i}`,
+        paint: {
+          'circle-radius': 4,
+          'circle-color': '#0000ff'
+        }
+      });
+    });
+  });
+</script>
+</body>
+</html>
